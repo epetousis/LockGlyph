@@ -1,8 +1,8 @@
 ARCHS = armv7 armv7s arm64
 
-TARGET = iphone:clang:latest:8.0
+TARGET = iphone:latest
 
-include theos/makefiles/common.mk
+include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = LockGlyph
 LockGlyph_FILES = Tweak.xm
@@ -14,7 +14,7 @@ BUNDLE_NAME = LockGlyph-Default
 LockGlyph-Default_INSTALL_PATH = /Library/Application Support/LockGlyph/Themes/
 
 include $(THEOS_MAKE_PATH)/tweak.mk
-include theos/makefiles/bundle.mk
+include $(THEOS)/makefiles/bundle.mk
 
 after-install::
 	install.exec "killall -9 backboardd"
