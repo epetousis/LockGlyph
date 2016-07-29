@@ -8,13 +8,6 @@
 #define kResetColorsAlertTag 1
 #define kApplyThemeAlertTag 2
 
-NSInteger system_nd(const char *command) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    return system_nd(command);
-#pragma GCC diagnostic pop
-}
-
 @protocol PreferencesTableCustomView
 - (id)initWithSpecifier:(id)arg1;
 
@@ -227,18 +220,6 @@ NSInteger system_nd(const char *command) {
     			);
     [self clearCache];
 	[self reload];
-}
-
--(void)respring {
-	/*UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Apply Theme"
-                                                    message:@"Are you sure you want to apply a theme?\n\nThis will make your device respring."
-                                                   delegate:self
-                                          cancelButtonTitle:@"No"
-                                          otherButtonTitles:@"Yes", nil];
-    alert.tag = kApplyThemeAlertTag;
-    [alert show];
-    [alert release];*/
-    system_nd("killall -9 backboardd");
 }
 
 /*- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
