@@ -44,6 +44,7 @@ BOOL shouldNotDelay;
 
 UIColor *primaryColorOverride;
 UIColor *secondaryColorOverride;
+BOOL overrideIsForCustomCover;
 
 static void setPrimaryColorOverride(UIColor *color) {
   if ([primaryColorOverride isEqual:color]) {
@@ -217,10 +218,12 @@ static void performShakeFingerFailAnimation(void) {
 	if([notification.name isEqualToString:@"ColorFlowLockScreenColorizationNotification"]) {
 		primaryColor = userInfo[@"PrimaryColor"];
 		secondaryColor = userInfo[@"SecondaryColor"];
+		overrideIsForCustomCover = NO;
 	}
 	else if([notification.name isEqualToString:@"CustomCoverLockScreenColourUpdateNotification"]) {
 		primaryColor = userInfo[@"PrimaryColour"];
 		secondaryColor = userInfo[@"SecondaryColour"];
+		overrideIsForCustomCover = YES;
 	}
 	setPrimaryColorOverride(primaryColor);
 	setSecondaryColorOverride(secondaryColor);
@@ -233,6 +236,12 @@ static void performShakeFingerFailAnimation(void) {
 -(void)didMoveToWindow {
 	if (!self.window) {
 		fingerglyph = nil;
+
+		// Fix to revert CustomCover override once we've been removed from the window.
+		if (overrideIsForCustomCover) {
+			setPrimaryColorOverride(nil);
+			setSecondaryColorOverride(nil);
+		}
 		return;
 	}
 
