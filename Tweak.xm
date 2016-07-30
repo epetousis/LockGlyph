@@ -261,7 +261,7 @@ static void performShakeFingerFailAnimation(void) {
 		CGRect screen = [[UIScreen mainScreen] bounds];
 		if (UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation])) {
 			if (landscapeY == 0 || !enableLandscapeY)
-				fingerglyph.center = CGPointMake(screen.size.height+CGRectGetMidY(screen),screen.size.width-60);
+				fingerglyph.center = CGPointMake(screen.size.width+CGRectGetMidX(screen),screen.size.height-60);
 			else
 				fingerglyph.center = CGPointMake(screen.size.height+CGRectGetMidY(screen),landscapeY);
 		} else {
@@ -454,7 +454,7 @@ http://stackoverflow.com/a/26081621
 	CGRect screen = [[UIScreen mainScreen] bounds];
 	if (UIInterfaceOrientationIsLandscape(toInterfaceOrientation)) {
 		if (landscapeY == 0 || !enableLandscapeY)
-			fingerglyph.center = CGPointMake(screen.size.height+CGRectGetMidY(screen),screen.size.width-60);
+			fingerglyph.center = CGPointMake(screen.size.width+CGRectGetMidX(screen),screen.size.height-60);
 		else
 			fingerglyph.center = CGPointMake(screen.size.height+CGRectGetMidY(screen),landscapeY);
 	} else {
