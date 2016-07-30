@@ -42,6 +42,31 @@ CGFloat landscapeY;
 NSString *themeBundleName;
 BOOL shouldNotDelay;
 
+UIColor *primaryColorOverride;
+UIColor *secondaryColorOverride;
+
+static void setPrimaryColorOverride(UIColor *color) {
+  if ([primaryColorOverride isEqual:color]) {
+    return;
+  }
+  primaryColorOverride = color;
+}
+
+static void setSecondaryColorOverride(UIColor *color) {
+  if ([secondaryColorOverride isEqual:color]) {
+    return;
+  }
+  secondaryColorOverride = color;
+}
+
+static UIColor * activePrimaryColor() {
+  return primaryColorOverride ?: primaryColor;
+}
+
+static UIColor * activeSecondaryColor() {
+  return secondaryColorOverride ?: secondaryColor;
+}
+
 static UIColor* parseColorFromPreferences(NSString* string) {
 	NSArray *prefsarray = [string componentsSeparatedByString: @":"];
 	NSString *hexString = [prefsarray objectAtIndex:0];
@@ -176,9 +201,11 @@ static void performShakeFingerFailAnimation(void) {
 
 %new
 - (void)LG_RevertUI:(NSNotification *)notification {
+	setPrimaryColorOverride(nil);
+	setSecondaryColorOverride(nil);
 	if (enabled && usingGlyph && fingerglyph) {
-		fingerglyph.secondaryColor = secondaryColor;
-		fingerglyph.primaryColor = primaryColor;
+		fingerglyph.primaryColor = activePrimaryColor();
+		fingerglyph.secondaryColor = activeSecondaryColor();
 	}
 }
 
@@ -195,22 +222,16 @@ static void performShakeFingerFailAnimation(void) {
 		primaryColor = userInfo[@"PrimaryColour"];
 		secondaryColor = userInfo[@"SecondaryColour"];
 	}
+	setPrimaryColorOverride(primaryColor);
+	setSecondaryColorOverride(secondaryColor);
 	if (enabled && usingGlyph && fingerglyph) {
-		fingerglyph.primaryColor = primaryColor;
-		fingerglyph.secondaryColor = secondaryColor;
+		fingerglyph.primaryColor = activePrimaryColor();
+		fingerglyph.secondaryColor = activeSecondaryColor();
 	}
 }
 
 -(void)didMoveToWindow {
 	if (!self.window) {
-		NSString *CFRevert = @"ColorFlowLockScreenColorReversionNotification";
-		NSString *CFColor = @"ColorFlowLockScreenColorizationNotification";
-		NSString *CCRevert = @"CustomCoverLockScreenColourResetNotification";
-		NSString *CCColor = @"CustomCoverLockScreenColourUpdateNotification";
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:CFRevert object:nil];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:CFColor object:nil];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:CCRevert object:nil];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:CCColor object:nil];
 		fingerglyph = nil;
 		return;
 	}
@@ -246,8 +267,8 @@ static void performShakeFingerFailAnimation(void) {
 		usingGlyph = YES;
 		fingerglyph = [[%c(PKGlyphView) alloc] initWithStyle:0];
 		fingerglyph.delegate = (id<PKGlyphViewDelegate>)self;
-		fingerglyph.secondaryColor = secondaryColor;
-		fingerglyph.primaryColor = primaryColor;
+		fingerglyph.primaryColor = activePrimaryColor();
+		fingerglyph.secondaryColor = activeSecondaryColor();
 		if (themeAssets && ([[NSFileManager defaultManager] fileExistsAtPath:[themeAssets pathForResource:@"IdleImage" ofType:@"png"]] || [[NSFileManager defaultManager] fileExistsAtPath:[themeAssets pathForResource:@"IdleImage@2x" ofType:@"png"]])) {
 			UIImage *customImage = [UIImage imageWithContentsOfFile:[themeAssets pathForResource:@"IdleImage" ofType:@"png"]];
 			fingerglyph.customImage = [UIImage imageWithCGImage:customImage.CGImage scale:[UIScreen mainScreen].scale orientation:customImage.imageOrientation];
