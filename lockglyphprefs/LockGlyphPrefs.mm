@@ -1,8 +1,9 @@
-#import <Preferences/Preferences.h>
-#import <Preferences/PSViewController.h>
-#import <Preferences/PSDetailController.h>
+#import <Preferences/PSSpecifier.h>
+#import <Preferences/PSListController.h>
+#import <Preferences/PSTableCell.h>
 
 #define kBundlePath @"/Library/Application Support/LockGlyph/Themes/"
+#define kSelfBundlePath @"/Library/PreferenceBundles/LockGlyphPrefs.bundle"
 
 #define kResetColorsAlertTag 1
 #define kApplyThemeAlertTag 2
@@ -19,6 +20,34 @@
 - (id)initWithStyle:(int)style reuseIdentifier:(id)arg2;
 @end
 
+@interface PSListController ()
+-(void)clearCache;
+-(void)reload;
+-(void)viewWillAppear:(BOOL)animated;
+@end
+
+@interface LGShared : NSObject
++(NSString *)localisedStringForKey:(NSString *)key;
++(void)parseSpecifiers:(NSArray *)specifiers;
+@end
+
+@implementation LGShared
+
++(NSString *)localisedStringForKey:(NSString *)key {
+	NSString *englishString = [[NSBundle bundleWithPath:[NSString stringWithFormat:@"%@/en.lproj",kSelfBundlePath]] localizedStringForKey:key value:@"" table:nil];
+	return [[NSBundle bundleWithPath:kSelfBundlePath] localizedStringForKey:key value:englishString table:nil];
+}
+
++(void)parseSpecifiers:(NSArray *)specifiers {
+	for (PSSpecifier *specifier in specifiers) {
+		NSString *localisedTitle = [LGShared localisedStringForKey:specifier.properties[@"label"]];
+		NSString *localisedFooter = [LGShared localisedStringForKey:specifier.properties[@"footerText"]];
+		[specifier setProperty:localisedFooter forKey:@"footerText"];
+		specifier.name = localisedTitle;
+	}
+}
+@end
+
 @interface LockGlyphPrefsListController: PSListController {
 }
 @end
@@ -28,6 +57,7 @@
 	if(_specifiers == nil) {
 		_specifiers = [[self loadSpecifiersFromPlistName:@"LockGlyphPrefs" target:self] retain];
 	}
+	[LGShared parseSpecifiers:_specifiers];
 	return _specifiers;
 }
 
@@ -60,13 +90,12 @@
 
 @implementation LockGlyphTitleCell
 
-- (id)initWithSpecifier:(PSSpecifier *)specifier
-{
-	self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"Cell"];
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(id)reuseIdentifier specifier:(id)specifier {
+	self = [super initWithStyle:style reuseIdentifier:reuseIdentifier specifier:specifier];
 
 	if (self) {
 
-		int width = [[UIScreen mainScreen] bounds].size.width;
+		int width = self.contentView.bounds.size.width;
 
 		CGRect frame = CGRectMake(0, 20, width, 60);
 		CGRect subtitleFrame = CGRectMake(0, 55, width, 60);
@@ -78,14 +107,18 @@
 		[tweakTitle setBackgroundColor:[UIColor clearColor]];
 		[tweakTitle setTextColor:[UIColor blackColor]];
 		[tweakTitle setTextAlignment:NSTextAlignmentCenter];
+		tweakTitle.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+		tweakTitle.contentMode = UIViewContentModeScaleToFill;
 
 		tweakSubtitle = [[UILabel alloc] initWithFrame:subtitleFrame];
 		[tweakSubtitle setNumberOfLines:1];
 		[tweakSubtitle setFont:[UIFont fontWithName:@"HelveticaNeue-Regular" size:18]];
-		[tweakSubtitle setText:@"By evilgoldfish."];
+		[tweakSubtitle setText:[LGShared localisedStringForKey:@"FIRST_SUBTITLE_TEXT"]];
 		[tweakSubtitle setBackgroundColor:[UIColor clearColor]];
 		[tweakSubtitle setTextColor:[UIColor colorWithRed:119/255.0f green:119/255.0f blue:122/255.0f alpha:1.0f]];
 		[tweakSubtitle setTextAlignment:NSTextAlignmentCenter];
+		tweakSubtitle.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+		tweakSubtitle.contentMode = UIViewContentModeScaleToFill;
 
 		[self addSubview:tweakTitle];
 		[self addSubview:tweakSubtitle];
@@ -94,8 +127,21 @@
 	return self;
 }
 
+- (instancetype)initWithSpecifier:(PSSpecifier *)specifier {
+	return [self initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"LockGlyphTitleCell" specifier:specifier];
+}
+
+- (void)setFrame:(CGRect)frame {
+	frame.origin.x = 0;
+	[super setFrame:frame];
+}
+
 - (CGFloat)preferredHeightForWidth:(CGFloat)arg1{
     return 125.0f;
+}
+
+- (CGFloat)preferredHeightForWidth:(CGFloat)width inTableView:(id)tableView {
+	return [self preferredHeightForWidth:width];
 }
 
 @end
@@ -111,6 +157,8 @@
 	if(_specifiers == nil) {
 		_specifiers = [[self loadSpecifiersFromPlistName:@"LockGlyphPrefs-Behaviour" target:self] retain];
 	}
+	[LGShared parseSpecifiers:_specifiers];
+	[(UINavigationItem *)self.navigationItem setTitle:[LGShared localisedStringForKey:@"BEHAVIOUR_TITLE"]];
 	return _specifiers;
 }
 @end
@@ -124,6 +172,8 @@
 	if(_specifiers == nil) {
 		_specifiers = [[self loadSpecifiersFromPlistName:@"LockGlyphPrefs-Animations" target:self] retain];
 	}
+	[LGShared parseSpecifiers:_specifiers];
+	[(UINavigationItem *)self.navigationItem setTitle:[LGShared localisedStringForKey:@"ANIMATIONS_TITLE"]];
 	return _specifiers;
 }
 @end
@@ -137,32 +187,42 @@
 	if(_specifiers == nil) {
 		_specifiers = [[self loadSpecifiersFromPlistName:@"LockGlyphPrefs-Appearance" target:self] retain];
 	}
+	[LGShared parseSpecifiers:_specifiers];
+	[(UINavigationItem *)self.navigationItem setTitle:[LGShared localisedStringForKey:@"APPEARANCE_TITLE"]];
 	return _specifiers;
 }
 
+- (void)viewWillAppear:(BOOL)animated
+{
+	[self clearCache];
+	[self reload];  
+	[super viewWillAppear:animated];
+}
+
 -(void)resetColors {
-	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Reset colours"
+	/*UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Reset colours"
 		message:@"Are you sure you want to reset colours?"
 		delegate:self     
 		cancelButtonTitle:@"No" 
 		otherButtonTitles:@"Yes", nil];
 	alert.tag = kResetColorsAlertTag;
 	[alert show];
-	[alert release];
+	[alert release];*/
+	CFPreferencesSetAppValue(CFSTR("primaryColor"), CFSTR("#BCBCBC:1.000000"), CFSTR("com.evilgoldfish.lockglyph"));
+    		CFPreferencesSetAppValue(CFSTR("secondaryColor"), CFSTR("#777777:1.000000"), CFSTR("com.evilgoldfish.lockglyph"));
+    		CFPreferencesAppSynchronize(CFSTR("com.evilgoldfish.lockglyph"));
+    		CFNotificationCenterPostNotification(
+    			CFNotificationCenterGetDarwinNotifyCenter(),
+    			CFSTR("com.evilgoldfish.lockglyph.settingschanged"),
+    			NULL,
+    			NULL,
+    			YES
+    			);
+    [self clearCache];
+	[self reload];
 }
 
--(void)respring {
-	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Apply Theme"
-                                                    message:@"Are you sure you want to apply a theme?\n\nThis will make your device respring."
-                                                   delegate:self
-                                          cancelButtonTitle:@"No"
-                                          otherButtonTitles:@"Yes", nil];
-    alert.tag = kApplyThemeAlertTag;
-    [alert show];
-    [alert release];
-}
-
-- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+/*- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
     if (buttonIndex == 1) { // Tapped yes
     	if (alertView.tag == kResetColorsAlertTag) {
     		CFPreferencesSetAppValue(CFSTR("primaryColor"), CFSTR("#BCBCBC:1.000000"), CFSTR("com.evilgoldfish.lockglyph"));
@@ -179,7 +239,7 @@
     		system("killall -9 backboardd");
     	}
     }
-}
+}*/
 
 -(NSArray *)themeTitles {
     NSMutableArray* files = [[[NSFileManager defaultManager]
