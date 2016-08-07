@@ -24,7 +24,7 @@
 "COLOURS_IDLECOLOUR_LABEL" = "Cor em espera";
 "COLOURS_SCANCOLOUR_LABEL" = "Cor enquanto escaneia";
 "COLOURS_RESET_LABEL" = "Restaurar as cores padrão";
-"FINGERPOS_HEADER_TEXT" = "Posição da Digital;
+"FINGERPOS_HEADER_TEXT" = "Posição da Digital";
 "FINGERPOS_PORTRAITYTOGL_LABEL" = "Coordenada Vertical Personalizada Y";
 "FINGERPOS_PORTRAITY_LABEL" = "Vertical Y";
 "FINGERPOS_LANDSCAPEYTOGL_LABEL" = "Coordenada Horizontal Personalizada Y";
@@ -32,7 +32,7 @@
 
 "ANIMATIONS_TITLE" = "Animações";
 "ANIM_HEADER_TEXT" = "Animações";
-"ANIM_TICKTOGL_LABEL" = "Utilizar animação de "checado"";
+"ANIM_TICKTOGL_LABEL" = "Utilizar animação de 'checado'";
 "ANIM_SHINETOGL_LABEL" = "Utilizar animação de brilho";
 "ANIM_FASTTOGL_LABEL" = "Utilizar animações mais rápidas";
 "ANIM_FOOTER_TEXT" = "Utilizar animações mais rápidas tornará a animação do LockGlyph muito mais rápida.";
