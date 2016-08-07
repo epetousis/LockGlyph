@@ -1,6 +1,5 @@
-ARCHS = armv7 armv7s arm64
-
 TARGET = iphone:latest
+#TARGET = simulator:clang
 
 include $(THEOS)/makefiles/common.mk
 
@@ -9,6 +8,7 @@ LockGlyph_FILES = Tweak.xm
 LockGlyph_FRAMEWORKS = UIKit CoreGraphics AudioToolbox AVFoundation QuartzCore
 SHARED_CFLAGS = -fobjc-arc
 ADDITIONAL_OBJCFLAGS = -fobjc-arc
+#LockGlyph_USE_SUBSTRATE = 0
 
 BUNDLE_NAME = LockGlyph-Default
 LockGlyph-Default_INSTALL_PATH = /Library/Application Support/LockGlyph/Themes/
